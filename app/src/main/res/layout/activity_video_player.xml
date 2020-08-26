@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".VideoPlayerActivity">
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        app:use_controller="true"
+        app:resize_mode="fit"
+        app:hide_on_touch="true"
+        app:show_timeout="3000"
+        app:rewind_increment="10000"
+        app:fastforward_increment="10000"
+        app:player_layout_id="@layout/exo_simple_player_view"
+        app:controller_layout_id="@layout/custom_controller" />
+
+    <RelativeLayout
+        android:id="@+id/rlActionbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:src="@drawable/ic_baseline_arrow_back_24"
+            android:tint="@android:color/white"
+            android:background="@android:color/transparent"
+            android:layout_width="?actionBarSize"
+            android:layout_height="?actionBarSize"/>
+
+        <TextView
+            android:id="@+id/txtVideoName"
+            android:text=""
+            android:layout_toRightOf="@+id/btnBack"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/circularstd_medium"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
