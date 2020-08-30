@@ -5,9 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,12 +23,14 @@ public class VideoFolderAdapter extends RecyclerView.Adapter<VideoFolderAdapter.
 
     private Context context;
     private VideoFolderAdapterListener listener;
-    private ArrayList<VideoFolderModel> videoList = new ArrayList<>();
+    public ArrayList<VideoFolderModel> videoList = new ArrayList<>();
+    public ArrayList<VideoFolderModel> selectedVideoList = new ArrayList<>();
     private int type;
 
-    public VideoFolderAdapter(Context context, ArrayList<VideoFolderModel> videoList, VideoFolderAdapterListener listener, int type) {
+    public VideoFolderAdapter(Context context, ArrayList<VideoFolderModel> videoList, ArrayList<VideoFolderModel> selectedVideoList, VideoFolderAdapterListener listener, int type) {
         this.context = context;
         this.videoList = videoList;
+        this.selectedVideoList = selectedVideoList;
         this.listener = listener;
         this.type = type;
     }
@@ -39,6 +43,7 @@ public class VideoFolderAdapter extends RecyclerView.Adapter<VideoFolderAdapter.
         private ImageView imageViewIF4;
         private TextView txtFolderName;
         private TextView txtFolderCount;
+        private RelativeLayout rlItem;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -49,6 +54,7 @@ public class VideoFolderAdapter extends RecyclerView.Adapter<VideoFolderAdapter.
             imageViewIF4 = itemView.findViewById(R.id.imageViewIF4);
             txtFolderName = itemView.findViewById(R.id.txtFolderName);
             txtFolderCount = itemView.findViewById(R.id.txtFolderCount);
+            rlItem = itemView.findViewById(R.id.rlItem);
         }
     }
 
@@ -71,6 +77,12 @@ public class VideoFolderAdapter extends RecyclerView.Adapter<VideoFolderAdapter.
 
         holder.txtFolderName.setText(videoList.get(i).getStrFolder());
         holder.txtFolderCount.setText("("+videoList.get(i).getVideopathList().size()+")");
+
+        if(selectedVideoList.contains(videoList.get(i))) {
+            holder.rlItem.setBackgroundColor(ContextCompat.getColor(context, R.color.list_item_selected_state));
+        }else {
+            holder.rlItem.setBackgroundColor(ContextCompat.getColor(context, R.color.list_item_normal_state));
+        }
 
         int size = videoList.get(i).getVideopathList().size();
         if (size >= 1) {

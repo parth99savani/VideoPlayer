@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".SearchActivity">
+
+    <RelativeLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        android:elevation="10dp"
+        android:layout_height="?actionBarSize">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:src="@drawable/ic_baseline_arrow_back_24"
+            android:tint="@android:color/white"
+            android:background="@android:color/transparent"
+            android:layout_width="?actionBarSize"
+            android:layout_height="match_parent"/>
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:queryHint="Search Here"
+            app:iconifiedByDefault="false"
+            android:theme="@style/SearchViewStyle"
+            style="@style/SearchViewStyle"
+            android:layout_toRightOf="@id/btnBack" />
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSearchVideo"
+        android:layout_below="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

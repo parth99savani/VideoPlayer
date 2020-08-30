@@ -3,4 +3,10 @@
     <color name="colorPrimary">#F83E3F</color>
     <color name="colorPrimaryDark">#F83E3F</color>
     <color name="colorAccent">#426565</color>
+
+    <color name="list_item_selected_state">#4DF83E3F</color>
+    <color name="list_item_normal_state">#FFFFFF</color>
+
+    <color name="textColorDisabled">#99FFFFFF</color>
+
 </resources>

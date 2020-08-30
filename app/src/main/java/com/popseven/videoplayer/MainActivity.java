@@ -1,23 +1,33 @@
 package com.popseven.videoplayer;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
@@ -28,20 +38,33 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.popseven.videoplayer.Adapter.VideoFolderAdapter;
+import com.popseven.videoplayer.Adapter.VideoListAdapter;
+import com.popseven.videoplayer.Utils.AlertDialogHelper;
+import com.popseven.videoplayer.Utils.RecyclerItemClickListener;
 import com.popseven.videoplayer.Model.VideoFolderModel;
 import com.popseven.videoplayer.Model.VideoModel;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, VideoFolderAdapter.VideoFolderAdapterListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, VideoFolderAdapter.VideoFolderAdapterListener, VideoListAdapter.VideoListAdapterListener, AlertDialogHelper.AlertDialogListener {
 
     private static final int REQUEST_PERMISSIONS = 100;
     private static ArrayList<VideoFolderModel> videoList = new ArrayList<>();
-    private boolean booleanFolder;
+    private boolean booleanFolder = false;
     private RecyclerView recyclerViewFolder;
     private VideoFolderAdapter adapter;
-    private boolean isGrid = false;
+    boolean isMultiSelect = false;
+    private ArrayList<VideoFolderModel> selectedVideoList = new ArrayList<>();
+    private ActionMode mActionMode;
+    private Menu context_menu;
+    private AlertDialogHelper alertDialogHelper;
+    private static ArrayList<VideoModel> allVideoList = new ArrayList<>();
+    private static ArrayList<VideoModel> selectedAllVideoList = new ArrayList<>();
+    private VideoListAdapter videoListAdapter;
+    private SharedPreferences sharedPref;
+    private MenuItem menuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        sharedPref = getSharedPreferences("com.popseven.videoplayer",MODE_PRIVATE);
 
         //Storage Permission
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -59,11 +84,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         recyclerViewFolder = findViewById(R.id.recyclerViewFolder);
 
-        recyclerViewFolder.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
-        recyclerViewFolder.setHasFixedSize(true);
+//        recyclerViewFolder.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
+//        recyclerViewFolder.setHasFixedSize(true);
 
         videoList.clear();
         reloadRecyclerView();
+
+        alertDialogHelper = new AlertDialogHelper(this);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -74,18 +101,78 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        recyclerViewFolder.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerViewFolder, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (isMultiSelect)
+                    multiSelect(position);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                if (!isMultiSelect) {
+                    if (sharedPref.getBoolean("byFolder", true)){
+                        selectedVideoList = new ArrayList<VideoFolderModel>();
+                    }else {
+                        selectedAllVideoList = new ArrayList<>();
+                    }
+                    isMultiSelect = true;
+
+                    if (mActionMode == null) {
+                        mActionMode = startActionMode(mActionModeCallback);
+                    }
+                }
+
+                multiSelect(position);
+
+            }
+        }));
+
     }
 
     private void reloadRecyclerView(){
-        videoList.clear();
         getVideoPath();
-        adapter = new VideoFolderAdapter(this,videoList,this,0);
-        recyclerViewFolder.setAdapter(adapter);
+        if(sharedPref.getBoolean("isGrid", false)) {
+            setGridView();
+        }else {
+            setListView();
+        }
+    }
+
+    private void setListView() {
+        recyclerViewFolder.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
+        recyclerViewFolder.setHasFixedSize(true);
+        if (sharedPref.getBoolean("byFolder", true)){
+            adapter = new VideoFolderAdapter(this,videoList, selectedVideoList,this,0);
+            recyclerViewFolder.setAdapter(adapter);
+        }else {
+            videoListAdapter = new VideoListAdapter(this,allVideoList, selectedAllVideoList,this,0);
+            recyclerViewFolder.setAdapter(videoListAdapter);
+        }
+    }
+
+    private void setGridView() {
+        recyclerViewFolder.setLayoutManager(new GridLayoutManager(this,2));
+        recyclerViewFolder.setHasFixedSize(true);
+        if (sharedPref.getBoolean("byFolder", true)){
+            adapter = new VideoFolderAdapter(this,videoList, selectedVideoList,this,1);
+            recyclerViewFolder.setAdapter(adapter);
+        }else {
+            videoListAdapter = new VideoListAdapter(this,allVideoList, selectedAllVideoList,this,1);
+            recyclerViewFolder.setAdapter(videoListAdapter);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        reloadRecyclerView();
+        invalidateOptionsMenu();
+        super.onResume();
     }
 
     public ArrayList<VideoFolderModel> getVideoPath() {
         videoList.clear();
-
+        booleanFolder = false;
         int int_position = 0;
         Uri uri;
         Cursor cursor;
@@ -161,12 +248,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-//        for (int i = 0; i < videoList.size(); i++) {
-//            Log.e("FOLDER", videoList.get(i).getStrFolder());
-//            for (int j = 0; j < videoList.get(i).getVideopathList().size(); j++) {
-//                Log.e("FILE", videoList.get(i).getVideopathList().get(j));
-//            }
-//        }
+        allVideoList.clear();
+        for (int i = 0; i < videoList.size(); i++) {
+            allVideoList.addAll(videoList.get(i).getVideopathList());
+        }
 
         return videoList;
     }
@@ -176,7 +261,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_option_menu,menu);
 
+        menuItem = menu.findItem(R.id.grid_view);
+        setIcon();
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setIcon() {
+        if(sharedPref.getBoolean("isGrid", false)) {
+            menuItem.setIcon(R.drawable.linear_view);
+        }else {
+            menuItem.setIcon(R.drawable.grid_view);
+        }
     }
 
     @Override
@@ -184,30 +280,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()){
 
             case R.id.grid_view:
-                if(isGrid==false)
-                {
-                    recyclerViewFolder.setLayoutManager(new GridLayoutManager(this,2));
-                    recyclerViewFolder.setHasFixedSize(true);
-                    adapter = new VideoFolderAdapter(this,videoList,this,1);
-                    recyclerViewFolder.setAdapter(adapter);
+                if(sharedPref.getBoolean("isGrid", false)==false) {
+                    setGridView();
                     item.setIcon(R.drawable.linear_view);
-                    isGrid = true;
+                    sharedPref.edit().putBoolean("isGrid", true).commit();
                 } else {
-                    recyclerViewFolder.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
-                    recyclerViewFolder.setHasFixedSize(true);
-                    adapter = new VideoFolderAdapter(this,videoList,this,0);
-                    recyclerViewFolder.setAdapter(adapter);
+                    setListView();
                     item.setIcon(R.drawable.grid_view);
-                    isGrid = false;
+                    sharedPref.edit().putBoolean("isGrid", false).commit();
                 }
                 break;
 
             case R.id.search:
-                //
+                Intent intent = new Intent(this,SearchActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("allVideoList", allVideoList);
+                intent.putExtras(bundle);
+                startActivity(intent);
                 break;
 
             case R.id.view:
-                //
+                final AlertDialog.Builder alertOptions = new AlertDialog.Builder(MainActivity.this);
+                String[] list = {"Folder", "Video"};
+                alertOptions.setItems(list, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        switch (i) {
+                            case 0:
+                                sharedPref.edit().putBoolean("byFolder", true).commit();
+                                reloadRecyclerView();
+                                dialog.dismiss();
+                                break;
+
+                            case 1:
+                                sharedPref.edit().putBoolean("byFolder", false).commit();
+                                reloadRecyclerView();
+                                dialog.dismiss();
+                                break;
+                        }
+                    }
+                });
+                alertOptions.show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -256,5 +369,130 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bundle.putString("strFolder", videoFolderModel.getStrFolder());
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    @Override
+    public void onVideoSelected(int i) {
+        Intent intent = new Intent(this,VideoPlayerActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("position", i);
+        bundle.putParcelableArrayList("videopathList", allVideoList);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    public void multiSelect(int position) {
+        if (mActionMode != null) {
+
+            if (sharedPref.getBoolean("byFolder", true)){
+                if (selectedVideoList.contains(videoList.get(position)))
+                    selectedVideoList.remove(videoList.get(position));
+                else
+                    selectedVideoList.add(videoList.get(position));
+
+                if (selectedVideoList.size() > 0)
+                    mActionMode.setTitle("" + selectedVideoList.size());
+                else
+                    mActionMode.setTitle("");
+            }else {
+                if (selectedAllVideoList.contains(allVideoList.get(position)))
+                    selectedAllVideoList.remove(allVideoList.get(position));
+                else
+                    selectedAllVideoList.add(allVideoList.get(position));
+
+                if (selectedAllVideoList.size() > 0)
+                    mActionMode.setTitle("" + selectedAllVideoList.size());
+                else
+                    mActionMode.setTitle("");
+            }
+
+            refreshAdapter();
+
+        }
+    }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_multi_select, menu);
+            context_menu = menu;
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_delete:
+                    if (sharedPref.getBoolean("byFolder", true)){
+                        alertDialogHelper.showAlertDialog("Delete Folder","Are you want to delete this folder?","DELETE","CANCEL",1,false);
+                    }else {
+                        alertDialogHelper.showAlertDialog("Delete Video","Are you want to delete this video?","DELETE","CANCEL",1,false);
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            isMultiSelect = false;
+            if (sharedPref.getBoolean("byFolder", true)){
+                selectedVideoList = new ArrayList<VideoFolderModel>();
+            }else {
+                selectedAllVideoList = new ArrayList<>();
+            }
+            refreshAdapter();
+        }
+    };
+
+    public void refreshAdapter() {
+        if (sharedPref.getBoolean("byFolder", true)){
+            adapter.selectedVideoList=selectedVideoList;
+            adapter.videoList=videoList;
+            adapter.notifyDataSetChanged();
+        }else {
+            videoListAdapter.selectedVideoList=selectedAllVideoList;
+            videoListAdapter.videoList=allVideoList;
+            videoListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onPositiveClick(int from) {
+//        if(from==1)
+//        {
+//            if(selectedVideoList.size()>0)
+//            {
+//                for(int i=0;i<selectedVideoList.size();i++)
+//                    videoList.remove(selectedVideoList.get(i));
+//
+//                adapter.notifyDataSetChanged();
+//
+//                if (mActionMode != null) {
+//                    mActionMode.finish();
+//                }
+//                Toast.makeText(getApplicationContext(), "Delete Click", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+    }
+
+    @Override
+    public void onNegativeClick(int from) {
+
+    }
+
+    @Override
+    public void onNeutralClick(int from) {
+
     }
 }

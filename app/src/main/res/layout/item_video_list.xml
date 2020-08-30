@@ -1,70 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardElevation="5dp"
-    app:cardCornerRadius="5dp"
-    app:cardUseCompatPadding="true">
+    android:id="@+id/rlVideo"
+    android:background="@android:color/white">
 
-    <RelativeLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="80dp">
+        android:layout_height="wrap_content"
+        app:cardElevation="5dp"
+        app:cardCornerRadius="5dp"
+        app:cardUseCompatPadding="true">
 
-        <ImageView
-            android:id="@+id/imgThumb"
-            android:scaleType="fitXY"
-            android:layout_width="130dp"
-            android:layout_height="match_parent"
-            android:background="#CCABABAB"
-            android:layout_alignParentLeft="true"/>
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@+id/imgThumb"
-            android:layout_toLeftOf="@+id/btnMore"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
-            android:layout_gravity="center_vertical"
-            android:padding="5dp">
+            android:layout_height="80dp">
 
-            <TextView
-                android:id="@+id/txtVideoName"
+            <ImageView
+                android:id="@+id/imgThumb"
+                android:scaleType="centerCrop"
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:background="#CCABABAB"
+                android:layout_alignParentLeft="true"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@+id/imgThumb"
+                android:layout_toLeftOf="@+id/btnMore"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_vertical"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/txtVideoName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginVertical="1dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:text="Name"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/txtVideoTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginVertical="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="5:00"
+                    android:textColor="@android:color/black"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnMore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginVertical="1dp"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:text="Name"
-                android:textColor="@android:color/black"
-                android:textSize="15sp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="5dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_baseline_more_vert_24" />
 
-            <TextView
-                android:id="@+id/txtVideoTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginVertical="5dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="5:00"
-                android:textColor="@android:color/black"
-                android:textSize="13sp" />
+        </RelativeLayout>
 
-        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <ImageButton
-            android:id="@+id/btnMore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_baseline_more_vert_24" />
 
-    </RelativeLayout>
 
-</androidx.cardview.widget.CardView>
+</RelativeLayout>

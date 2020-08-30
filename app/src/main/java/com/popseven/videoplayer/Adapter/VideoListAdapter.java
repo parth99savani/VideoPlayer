@@ -11,12 +11,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -31,12 +33,14 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.MyVi
 
     private Context context;
     private VideoListAdapter.VideoListAdapterListener listener;
-    private ArrayList<VideoModel> videoList = new ArrayList<>();
+    public ArrayList<VideoModel> videoList = new ArrayList<>();
+    public ArrayList<VideoModel> selectedVideoList = new ArrayList<>();
     private int type;
 
-    public VideoListAdapter(Context context, ArrayList<VideoModel> videoList, VideoListAdapter.VideoListAdapterListener listener, int type) {
+    public VideoListAdapter(Context context, ArrayList<VideoModel> videoList, ArrayList<VideoModel> selectedVideoList, VideoListAdapter.VideoListAdapterListener listener, int type) {
         this.context = context;
         this.videoList = videoList;
+        this.selectedVideoList = selectedVideoList;
         this.listener = listener;
         this.type = type;
     }
@@ -47,6 +51,7 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.MyVi
         private TextView txtVideoName;
         private TextView txtVideoTime;
         private ImageButton btnMore;
+        private RelativeLayout rlVideo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -55,6 +60,7 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.MyVi
             txtVideoName = itemView.findViewById(R.id.txtVideoName);
             txtVideoTime = itemView.findViewById(R.id.txtVideoTime);
             btnMore = itemView.findViewById(R.id.btnMore);
+            rlVideo = itemView.findViewById(R.id.rlVideo);
         }
     }
 
@@ -79,6 +85,12 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.MyVi
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .into(holder.imgThumb);
+
+        if(selectedVideoList.contains(videoList.get(i))) {
+            holder.rlVideo.setBackgroundColor(ContextCompat.getColor(context, R.color.list_item_selected_state));
+        }else {
+            holder.rlVideo.setBackgroundColor(ContextCompat.getColor(context, R.color.list_item_normal_state));
+        }
 
         holder.txtVideoName.setText(videoList.get(i).getTitle());
         holder.txtVideoTime.setText(videoList.get(i).getDuration());

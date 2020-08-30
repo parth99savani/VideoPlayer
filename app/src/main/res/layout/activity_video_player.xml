@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".VideoPlayerActivity">
 
     <com.google.android.exoplayer2.ui.PlayerView
@@ -38,6 +39,7 @@
             android:id="@+id/txtVideoName"
             android:text=""
             android:layout_toRightOf="@+id/btnBack"
+            android:layout_toLeftOf="@+id/btnAR"
             android:textColor="@android:color/white"
             android:fontFamily="@font/circularstd_medium"
             android:singleLine="true"
@@ -47,6 +49,160 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"/>
 
+        <ImageButton
+            android:id="@+id/btnAR"
+            android:src="@drawable/ic_ar"
+            android:background="@drawable/ar_border"
+            android:layout_alignParentRight="true"
+            android:paddingBottom="3dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="1dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/volume_slider_container"
+        android:gravity="center"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_volume_up_24"
+            android:id="@+id/volIcon"/>
+
+        <ProgressBar
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:max="100"
+            android:progress="33"
+            android:id="@+id/volume_slider"
+            android:progressDrawable="@drawable/progressbar_volume"
+            android:layout_marginRight="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/brightness_slider_container"
+        android:gravity="center"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_brightness_low_24"
+            android:id="@+id/brightnessIcon"/>
+        <ProgressBar
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:max="100"
+            android:progress="33"
+            android:id="@+id/brightness_slider"
+            android:progressDrawable="@drawable/progressbar_brightness"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="0dp"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:id="@+id/vol_center_text"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true" >
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/vol_image"
+            android:src="@drawable/ic_baseline_volume_up_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" 22"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            android:id="@+id/vol_perc_center_text"
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:id="@+id/brightness_center_text"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true" >
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/brightness_image"
+            android:src="@drawable/ic_baseline_brightness_medium_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" 22"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            android:id="@+id/brigtness_perc_center_text"
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/seekbar_center_text"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:44"
+            android:textSize="50dp"
+            android:textStyle="bold"
+            android:id="@+id/txt_seek_currTime"
+            android:textColor="#ffffff" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[ +00:10 ]"
+            android:textSize="50dp"
+            android:textStyle="bold"
+            android:id="@+id/txt_seek_secs"
+            android:textColor="#ffffff" />
+
+    </LinearLayout>
 
 </RelativeLayout>
